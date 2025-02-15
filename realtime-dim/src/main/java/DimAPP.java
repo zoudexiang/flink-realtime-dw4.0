@@ -5,6 +5,7 @@ import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.util.Collector;
 import org.taitan.flink.realtime.common.base.BaseAPP;
 import org.taitan.flink.realtime.common.constant.Constant;
 import org.taitan.flink.realtime.common.util.FlinkSourceUtil;
@@ -70,21 +71,24 @@ public class DimAPP extends BaseAPP {
      */
     public SingleOutputStreamOperator<JSONObject> transfer(DataStreamSource<String> stream) {
 
-        return stream.flatMap((FlatMapFunction<String, JSONObject>) (value, out) -> {
-            try {
-                // MaxWell 抓取的实时数据的 json 格式
-                JSONObject jsonObject = JSONObject.parseObject(value);
-                String database = jsonObject.getString("database");
-                String type = jsonObject.getString("type");
-                JSONObject data = jsonObject.getJSONObject("data");
-                if ("gmall".equals(database)
-                        && !"bootstrap-start".equals(type)
-                        && !"bootstrap-complete".equals(type)
-                        && data != null && data.size() != 0) {
-                    out.collect(jsonObject);
+        return stream.flatMap(new FlatMapFunction<String, JSONObject>() {
+            @Override
+            public void flatMap(String s, Collector<JSONObject> out) throws Exception {
+                try {
+                    // MaxWell 抓取的实时数据的 json 格式
+                    JSONObject jsonObject = JSONObject.parseObject(s);
+                    String database = jsonObject.getString("database");
+                    String type = jsonObject.getString("type");
+                    JSONObject data = jsonObject.getJSONObject("data");
+                    if ("gmall".equals(database)
+                            && !"bootstrap-start".equals(type)
+                            && !"bootstrap-complete".equals(type)
+                            && data != null && data.size() != 0) {
+                        out.collect(jsonObject);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }).returns(JSONObject.class);
     }
