@@ -26,8 +26,7 @@ import java.util.Properties;
  */
 public class FlinkSourceUtil {
 
-    public static KafkaSource<String> getKafkaSource(String groupId,
-                                                     String topic) {
+    public static KafkaSource<String> getKafkaSource(String groupId, String topic) {
         return KafkaSource.<String>builder()
                 .setBootstrapServers(Constant.KAFKA_BROKERS)
                 .setGroupId(groupId)

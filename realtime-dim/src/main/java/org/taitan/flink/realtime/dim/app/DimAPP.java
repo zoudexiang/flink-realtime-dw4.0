@@ -49,27 +49,6 @@ public class DimAPP extends BaseAPP {
 
         // 核心业务逻辑
         // 1. 对 ods 读取的原始数据进行数据清洗
-//        stream.filter(new FilterFunction<String>() {
-//            @Override
-//            public boolean filter(String value) throws Exception {
-//                boolean flat = false;
-//                try {
-//                    JSONObject jsonObject = JSONObject.parseObject(value);
-//                    String database = jsonObject.getString("database");
-//                    String type = jsonObject.getString("type");
-//                    JSONObject data = jsonObject.getJSONObject("data");
-//                    if ("gmall".equals(database) &&
-//                            !"bootstrap-start".equals(type) && !"bootstrap-complete".equals(type)
-//                            && data != null && data.size() != 0){
-//                        flat = true;
-//                    }
-//                }catch (Exception e){
-//                    e.printStackTrace();
-//                }
-//                return flat;
-//            }
-//        }).map(JSONObject::parseObject);
-
         SingleOutputStreamOperator<JSONObject> jsonObjStream = transfer(stream);
 
         // 2. 使用 flinkCDC 读取监控配置表数据
@@ -160,12 +139,12 @@ public class DimAPP extends BaseAPP {
                 try {
                     JSONObject jsonObject = JSONObject.parseObject(value);
                     String op = jsonObject.getString("op");
+                    // FlinkCDC 抓取的 mysql 配置维表的内容，数据格式为 JSON
                     TableProcessDim dim;
                     if ("d".equals(op)) {
                         dim = jsonObject.getObject("before", TableProcessDim.class);
                         // 当配置表发送一个 D 类型的数据  对应 HBase 需要删除一张维度表
                         deleteTable(dim);
-
                     } else if ("c".equals(op) || "r".equals(op)) {
                         dim = jsonObject.getObject("after", TableProcessDim.class);
                         createTable(dim);
@@ -222,7 +201,8 @@ public class DimAPP extends BaseAPP {
                     if ("gmall".equals(database)
                             && !"bootstrap-start".equals(type)
                             && !"bootstrap-complete".equals(type)
-                            && data != null && data.size() != 0) {
+                            && data != null
+                            && data.size() != 0) {
                         out.collect(jsonObject);
                     }
                 } catch (Exception e) {
