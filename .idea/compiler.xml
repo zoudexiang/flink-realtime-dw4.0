@@ -8,7 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="realtime-dim" />
         <module name="realtime-dws" />
-        <module name="realtime-dwd" />
+        <module name="realtime-dwd-base-log" />
         <module name="realtime-common" />
       </profile>
     </annotationProcessing>
