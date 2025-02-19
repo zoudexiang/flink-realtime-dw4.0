@@ -54,9 +54,7 @@ public abstract class BaseSQLAPP {
 
 
         // 2. 执行具体的处理逻辑
-        handle(tableEnv,env,ckAndGroupId);
-
-
+        handle(tableEnv, env, ckAndGroupId);
     }
     // 1.5 读取topic_db数据
     public void createTopicDb(String ckAndGroupId, StreamTableEnvironment tableEnv) {

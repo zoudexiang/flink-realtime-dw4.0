@@ -28,9 +28,10 @@ public class SQLUtil {
                 "  `database` STRING,\n" +
                 "  `table` STRING,\n" +
                 "  `type` STRING,\n" +
-                "  `data` map<STRING,STRING>,\n" +
-                "  `old` map<STRING,STRING>,\n" +
+                "  `data` map<STRING, STRING>,\n" +
+                "  `old` map<STRING, STRING>,\n" +
                 "  `ts` bigint,\n" +
+                // 执行 LookUp Join 要求提供一个处理时间
                 "  proc_time as PROCTIME(), \n" +
                 "  row_time as TO_TIMESTAMP_LTZ(ts,3), \n" +
                 "  WATERMARK FOR row_time AS row_time - INTERVAL '5' SECOND\n" +
@@ -43,6 +44,21 @@ public class SQLUtil {
                 "  'topic' = '" + topicName + "',\n" +
                 "  'properties.bootstrap.servers' = '" + Constant.KAFKA_BROKERS +"',\n" +
                 "  'format' = 'json'\n" +
+                ")";
+    }
+
+    /**
+     * 获取 upsert kafka 的连接   创建表格的语句最后一定要声明主键
+     * @param topicName
+     * @return
+     */
+    public static String getUpsertKafkaSQL(String topicName){
+        return "WITH (\n" +
+                "  'connector' = 'upsert-kafka',\n" +
+                "  'topic' = '" + topicName + "',\n" +
+                "  'properties.bootstrap.servers' = '" + Constant.KAFKA_BROKERS +"',\n" +
+                "  'key.format' = 'json',\n" +
+                "  'value.format' = 'json'\n" +
                 ")";
     }
 }
